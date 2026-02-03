@@ -334,23 +334,16 @@
             
             <nav id="sidebar-nav" class="d-flex flex-column flex-grow-1">
                 <a href="#" class="nav-link active" onclick="renderDashboardExec()"><i class="bi bi-bar-chart-line"></i> Analytics</a>
-                 <hr>
                 <a href="#" class="nav-link" onclick="renderDashboard()"><i class="bi bi-layers"></i> Assessments</a>
-                
                 <div id="sidebar-dims"></div>
-
+                <a href="#" id="nav-library" class="nav-link" onclick="renderLibrary()"><i class="bi bi-collection"></i> Question Library</a>
+                <a href="#" id="nav-auditor" class="nav-link" onclick="renderAuditor()"><i class="bi bi-pencil-square"></i> Audit Mode</a>
 
                 <hr>
-                 <a href="#" id="nav-library" class="nav-link" onclick="renderLibrary()"><i class="bi bi-collection"></i> Question Library</a>
-
-                 <hr>
-                    <a href="#" id="nav-config" class="nav-link" onclick="openConfig()"><i class="bi bi-gear"></i> Configuration</a>
             </nav>
 
             <div class="user-profile text-dark small">
-                                            <a href="#" id="nav-auditor" class="nav-link" onclick="renderAuditor()"><i class="bi bi-pencil-square"></i> Audit Mode</a>
-                                                             <hr>
-
+                            
                 <div class="fw-bold" id="sidebar-username">Admin</div>
                 <div class="text-muted mb-2" id="sidebar-role">System Admin</div>
                 <a href="#" onclick="handleLogout()" class="text-danger small text-decoration-none"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -510,38 +503,24 @@
             <div id="view-auditor" class="hidden">
                 <h2 class="fw-bold mb-4">Auditor Dashboard</h2>
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> Select a group to <strong>edit existing questions</strong> or <strong>add new ones</strong>.
+                    <i class="bi bi-info-circle"></i> The <strong>Question Library</strong> tab above now offers a master view for easier management. Use this page for rapid structural additions.
                 </div>
                 <div class="stat-card">
-                    <h5 class="fw-bold mb-3">Question Management</h5>
+                    <h5 class="fw-bold mb-3">Rapid Question Entry</h5>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label small">Dimension</label>
-                            <select class="form-select" id="audit-dim" onchange="loadAuditPillars()"><option value="">Select...</option></select>
+                            <select class="form-select" id="audit-dim" onchange="loadAuditPillars()"></select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small">Focus Area</label>
-                            <select class="form-select" id="audit-pillar" onchange="loadAuditGroups()"><option value="">Select...</option></select>
+                            <select class="form-select" id="audit-pillar" onchange="loadAuditGroups()"></select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small">Assessment Group</label>
-                            <select class="form-select" id="audit-group" onchange="loadAuditQuestions()"><option value="">Select...</option></select>
+                            <select class="form-select" id="audit-group"></select>
                         </div>
                     </div>
-
-                    <!-- Existing Questions List -->
-                    <div id="audit-questions-list" class="mt-3 hidden">
-                        <div class="mb-3">
-                            <label class="form-label small">Existing Questions in Group</label>
-                            <div id="questions-buttons" class="d-flex flex-wrap gap-2"></div>
-                        </div>
-                    </div>
-                    
                     <hr>
-                    
                     <div class="mb-3">
-                        <label class="form-label">Question Text</label>
-                        <textarea class="form-control" id="audit-q-text" rows="2" placeholder="Question Text or select existing..."></textarea>
+                        <textarea class="form-control" id="audit-q-text" rows="2" placeholder="Question Text"></textarea>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6"><input type="text" id="audit-l0" class="form-control form-control-sm" placeholder="L0: None"></div>
@@ -551,10 +530,7 @@
                         <div class="col-6"><input type="text" id="audit-l4" class="form-control form-control-sm" placeholder="L4: Mng"></div>
                         <div class="col-6"><input type="text" id="audit-l5" class="form-control form-control-sm" placeholder="L5: Opt"></div>
                     </div>
-                    <div class="row g-2">
-                        <div class="col-6"><button class="btn btn-primary w-100" id="audit-save-btn" onclick="submitAuditorForm()">Add Question</button></div>
-                        <div class="col-6"><button class="btn btn-outline-secondary w-100" id="audit-clear-btn" onclick="clearAuditForm()">Clear</button></div>
-                    </div>
+                    <button class="btn btn-primary w-100" onclick="submitAuditorForm()">Add Question</button>
                 </div>
             </div>
 
@@ -565,7 +541,7 @@
     <div class="modal fade" id="addQModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Add New Question</h5></div>
+                <div class="modal-header"><h5 class="modal-title">Add to Library</h5></div>
                 <div class="modal-body">
                     <form id="lib-form">
                         <div class="mb-3">
@@ -573,16 +549,16 @@
                             <select class="form-select" id="lib-dim" onchange="loadLibPillars()"></select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Focus Area (Pillar)</label>
+                            <label class="form-label">Pillar</label>
                             <select class="form-select" id="lib-pillar" onchange="loadLibGroups()"></select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Assessment Group</label>
+                            <label class="form-label">Group</label>
                             <select class="form-select" id="lib-group"></select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Question</label>
-                            <textarea class="form-control" id="lib-q-text" rows="3" placeholder="Enter your question..."></textarea>
+                            <textarea class="form-control" id="lib-q-text" rows="3"></textarea>
                         </div>
                     </form>
                 </div>
@@ -700,12 +676,6 @@
             }
             renderSidebar();
             renderDashboardExec();
-            
-            // Wire up modal initialization
-            const addQModal = document.getElementById('addQModal');
-            if (addQModal) {
-                addQModal.addEventListener('show.bs.modal', initLibraryModal);
-            }
         }
 
         function handleLogout() { sessionStorage.removeItem('tasheer_user_ent_v3'); location.reload(); }
@@ -953,33 +923,15 @@
         function loadLibPillars() {
             const dIdx = document.getElementById('lib-dim').value;
             const pSelect = document.getElementById('lib-pillar');
-            const gSelect = document.getElementById('lib-group');
-            pSelect.innerHTML = '<option value="">Select a Pillar...</option>';
-            gSelect.innerHTML = '<option value="">Select a Group...</option>';
-            if(dIdx !== "") {
-                appData[dIdx].pillars.forEach((p, i) => pSelect.innerHTML += `<option value="${i}">${p.name}</option>`);
-            }
+            pSelect.innerHTML = '';
+            if(dIdx !== "") appData[dIdx].pillars.forEach((p, i) => pSelect.innerHTML += `<option value="${i}">${p.name}</option>`);
         }
         function loadLibGroups() {
             const dIdx = document.getElementById('lib-dim').value;
             const pIdx = document.getElementById('lib-pillar').value;
             const gSelect = document.getElementById('lib-group');
-            gSelect.innerHTML = '<option value="">Select a Group...</option>';
-            if(dIdx !== "" && pIdx !== "") {
-                if(appData[dIdx] && appData[dIdx].pillars[pIdx]) {
-                    appData[dIdx].pillars[pIdx].groups.forEach((g, i) => gSelect.innerHTML += `<option value="${i}">${g.name}</option>`);
-                }
-            }
-        }
-        function initLibraryModal() {
-            const dSelect = document.getElementById('lib-dim');
-            const pSelect = document.getElementById('lib-pillar');
-            const gSelect = document.getElementById('lib-group');
-            dSelect.innerHTML = '<option value="">Select a Dimension...</option>';
-            pSelect.innerHTML = '<option value="">Select a Pillar...</option>';
-            gSelect.innerHTML = '<option value="">Select a Group...</option>';
-            document.getElementById('lib-q-text').value = '';
-            appData.forEach((d, i) => dSelect.innerHTML += `<option value="${i}">${d.name}</option>`);
+            gSelect.innerHTML = '';
+            if(dIdx !== "" && pIdx !== "") appData[dIdx].pillars[pIdx].groups.forEach((g, i) => gSelect.innerHTML += `<option value="${i}">${g.name}</option>`);
         }
         function submitLibForm() {
             const dIdx = document.getElementById('lib-dim').value;
@@ -1120,132 +1072,42 @@
         // --- 7. AUDITOR MODE ---
         function renderAuditor() {
             switchView('view-auditor');
-            setActiveNav('nav-auditor');
             const dimSelect = document.getElementById('audit-dim');
-            dimSelect.innerHTML = '<option value="">Select...</option>';
+            dimSelect.innerHTML = '';
             appData.forEach((d, i) => { dimSelect.innerHTML += `<option value="${i}">${d.name}</option>`; });
-            clearAuditForm();
         }
         function loadAuditPillars() {
             const dIdx = document.getElementById('audit-dim').value;
             const pSelect = document.getElementById('audit-pillar');
-            const gSelect = document.getElementById('audit-group');
-            pSelect.innerHTML = '<option value="">Select...</option>';
-            gSelect.innerHTML = '<option value="">Select...</option>';
-            document.getElementById('audit-questions-list').classList.add('hidden');
+            pSelect.innerHTML = '';
             if(dIdx !== "") appData[dIdx].pillars.forEach((p, i) => pSelect.innerHTML += `<option value="${i}">${p.name}</option>`);            
+            document.getElementById('audit-group').innerHTML = '';
         }
         function loadAuditGroups() {
             const dIdx = document.getElementById('audit-dim').value;
             const pIdx = document.getElementById('audit-pillar').value;
             const gSelect = document.getElementById('audit-group');
-            gSelect.innerHTML = '<option value="">Select...</option>';
-            document.getElementById('audit-questions-list').classList.add('hidden');
+            gSelect.innerHTML = '';
             if(dIdx !== "" && pIdx !== "" && appData[dIdx] && appData[dIdx].pillars[pIdx]) {
                 appData[dIdx].pillars[pIdx].groups.forEach((g, i) => gSelect.innerHTML += `<option value="${i}">${g.name}</option>`);
             }
         }
-        function loadAuditQuestions() {
-            const dIdx = document.getElementById('audit-dim').value;
-            const pIdx = document.getElementById('audit-pillar').value;
-            const gIdx = document.getElementById('audit-group').value;
-            const questionsList = document.getElementById('audit-questions-list');
-            const buttonsDiv = document.getElementById('questions-buttons');
-            
-            if(dIdx === "" || pIdx === "" || gIdx === "") {
-                questionsList.classList.add('hidden');
-                clearAuditForm();
-                return;
-            }
-            
-            const group = appData[dIdx].pillars[pIdx].groups[gIdx];
-            if(!group.questions || group.questions.length === 0) {
-                questionsList.classList.add('hidden');
-                clearAuditForm();
-                return;
-            }
-            
-            buttonsDiv.innerHTML = '';
-            group.questions.forEach((q, qIdx) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'btn btn-outline-secondary btn-sm';
-                btn.innerHTML = `Q${qIdx + 1}`;
-                btn.onclick = () => loadQuestionIntoForm(dIdx, pIdx, gIdx, qIdx);
-                buttonsDiv.appendChild(btn);
-            });
-            
-            questionsList.classList.remove('hidden');
-        }
-        
-        function loadQuestionIntoForm(dIdx, pIdx, gIdx, qIdx) {
-            const q = appData[dIdx].pillars[pIdx].groups[gIdx].questions[qIdx];
-            if(!q) return;
-            
-            document.getElementById('audit-q-text').value = q.text;
-            document.getElementById('audit-l0').value = q.levels[0] || '';
-            document.getElementById('audit-l1').value = q.levels[1] || '';
-            document.getElementById('audit-l2').value = q.levels[2] || '';
-            document.getElementById('audit-l3').value = q.levels[3] || '';
-            document.getElementById('audit-l4').value = q.levels[4] || '';
-            document.getElementById('audit-l5').value = q.levels[5] || '';
-            
-            // Store current edit context
-            window.auditEditContext = { dIdx, pIdx, gIdx, qIdx };
-            
-            // Change button text
-            document.getElementById('audit-save-btn').innerText = 'Update Question';
-        }
-        
-        function clearAuditForm() {
-            document.getElementById('audit-q-text').value = '';
-            document.getElementById('audit-l0').value = '';
-            document.getElementById('audit-l1').value = '';
-            document.getElementById('audit-l2').value = '';
-            document.getElementById('audit-l3').value = '';
-            document.getElementById('audit-l4').value = '';
-            document.getElementById('audit-l5').value = '';
-            document.getElementById('audit-save-btn').innerText = 'Add Question';
-            window.auditEditContext = null;
-        }
-        
         function submitAuditorForm() {
             const dIdx = document.getElementById('audit-dim').value;
             const pIdx = document.getElementById('audit-pillar').value;
             const gIdx = document.getElementById('audit-group').value;
             const text = document.getElementById('audit-q-text').value;
-            
             if(dIdx===""||pIdx===""||gIdx===""||!text) return alert("Fill fields");
             
-            const levels = [
-                document.getElementById('audit-l0').value || 'None',
-                document.getElementById('audit-l1').value || 'Basic',
-                document.getElementById('audit-l2').value || 'Dev',
-                document.getElementById('audit-l3').value || 'Def',
-                document.getElementById('audit-l4').value || 'Mng',
-                document.getElementById('audit-l5').value || 'Opt'
-            ];
-            
-            // Check if editing existing question
-            if(window.auditEditContext) {
-                const { dIdx: edIdx, pIdx: epIdx, gIdx: egIdx, qIdx: eqIdx } = window.auditEditContext;
-                appData[edIdx].pillars[epIdx].groups[egIdx].questions[eqIdx].text = text;
-                appData[edIdx].pillars[epIdx].groups[egIdx].questions[eqIdx].levels = levels;
-                saveData();
-                showToast("Question updated");
-            } else {
-                const newQ = {
-                    id: Date.now().toString(),
-                    text: text,
-                    levels: levels
-                };
-                appData[dIdx].pillars[pIdx].groups[gIdx].questions.push(newQ);
-                saveData();
-                showToast("Question added");
-            }
-            
-            clearAuditForm();
-            loadAuditQuestions();
+            const newQ = {
+                id: Date.now().toString(),
+                text: text,
+                levels: ["None","Basic","Dev","Def","Mng","Opt"]
+            };
+            appData[dIdx].pillars[pIdx].groups[gIdx].questions.push(newQ);
+            saveData();
+            document.getElementById('audit-q-text').value = '';
+            showToast("Added");
         }
         function exportDataToFile() {
             const dataStr = JSON.stringify(appData, null, 2);
