@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasheer DMI 2026 | Enterprise Edition</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* --- THEME VARIABLES (Imported from Reference) --- */
+        :root {
+            --primary-blue: #004d9c;
+            --sidebar-bg: #f8fafc;
+            --sidebar-width: 350px; 
+            transition: --sidebar-width 0.2s ease;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR STYLES (From Reference) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid #e5e7eb;
+            padding-top: 130px; 
+            z-index: 90;
+            transition: width 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 70px;
+            background-color: var(--sidebar-bg);
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 91;
+            transition: width 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-controls {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: var(--sidebar-width);
+            padding: 5px 16px;
+            background-color: var(--sidebar-bg);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 91;
+            transition: width 0.2s ease;
+        }
+
+        .company-overall-link {
+            position: fixed;
+            top: 105px;
+            left: 0;
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            z-index: 91;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
+            transition: width 0.2s ease;
+        }
+
+        .division-header {
+            text-transform: none;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 1rem;
+            padding: 10px 16px 4px 16px;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer; 
+            user-select: none;
+        }
+        
+        .division-header.active {
+            background: #e0ecff;
+            color: var(--primary-blue);
+            border-radius: 10px;
+            margin: 2px 8px;
+        }
+        
+        .sub-group-header {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.9rem;
+            padding: 8px 16px 4px 16px;
+            margin: 4px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .sub-group-header:hover {
+            background: #e5e7eb;
+        }
+
+        .division-average {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--primary-blue);
+            background: #e5f1ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .division-toggle {
+            transition: transform 0.2s;
+        }
+        .division-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        .division-toggle.expanded {
+            transform: rotate(0deg);
+        }
+
+        .sidebar .nav-link {
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin: 2px 8px;
+            color: #475569;
+            font-size: 0.92rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .sidebar .nav-link.overall-link {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        .sidebar .nav-link.overall-link.active {
+            background: #e0ecff;
+            color: var(--primary-blue);
+            font-weight: 700;
+        }
+
+        .sidebar .nav-link.sub-link {
+            padding-left: 30px;
+        }
+        
+        .sidebar .nav-link span:first-of-type {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sidebar .nav-link i {
+            font-size: 1.1rem;
+        }
+
+        .sidebar .nav-link:hover {
+            background: #e5f1ff;
+            color: var(--primary-blue);
+        }
+
+        .sidebar .nav-link.active {
+            background: #e0ecff;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .department-separator {
+            border-top: 1px solid #e5e7eb;
+            margin: 10px 16px;
+        }
+
+        /* Slider style fix */
+        .sidebar-controls input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        .sidebar-controls input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            cursor: pointer;
+        }
+        .sidebar-controls input[type=range]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        /* --- MAIN CONTENT LAYOUT --- */
+        .main-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 90px 24px 32px; /* Adjusted top padding to clear sidebar header */
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.2s ease;
+            position: relative;
+            z-index: 1; /* Above sidebar content but below sidebar controls */
+        }
+
+        /* --- CARDS & CHARTS (Existing Styles) --- */
+        .stat-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            border: 1px solid #e2e8f0; 
+            height: 100%; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        /* --- TABLE (Library) --- */
+        .custom-table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .table th { background: #f8fafc; border-bottom: 2px solid #e2e8f0; font-weight: 600; color: #475569; }
+        .table-hover tbody tr:hover { background-color: #f1f5f9; cursor: pointer; }
+
+        /* --- ASSESSMENT --- */
+        .maturity-scale { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .ms-btn {
+            flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;
+            background: white; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 0.85rem;
+        }
+        .ms-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .ms-btn.selected { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+        .ms-btn.level-0.selected { background: #ef4444; border-color: #ef4444; }
+        .ms-btn.level-1.selected { background: #f97316; border-color: #f97316; }
+        .ms-btn.level-2.selected { background: #eab308; border-color: #eab308; }
+        .ms-btn.level-3.selected { background: #22c55e; border-color: #22c55e; }
+        .ms-btn.level-4.selected { background: #3b82f6; border-color: #3b82f6; }
+        .ms-btn.level-5.selected { background: #0f172a; border-color: #0f172a; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN (Existing) -->
+    <div id="login-container" style="
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        display: flex; justify-content: center; align-items: center; z-index: 2000;
+        transition: opacity 0.5s ease;
+    ">
+        <div class="login-card" style="
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border:1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; width: 100%; max-width: 400px; padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            color: white;
+        ">
+            <i class="bi bi-grid-fill fs-1 text-info mb-3"></i>
+            <h3 class="fw-bold mb-1">Tasheer DMI</h3>
+            <p class="opacity-50 small mb-4">Digital Maturity Index 2026</p>
+            
+            <div class="mb-3 text-start">
+                <input type="text" id="login-user" class="form-control mb-2" style="background: rgba(255, 255, 255, 0.1); border: none; color: white; padding: 12px;" value="admin" placeholder="Username">
+                <input type="password" id="login-pass" class="form-control" style="background: rgba(255, 255, 255, 0.1); border: none; color: white; padding: 12px;" value="admin123" placeholder="Password">
+            </div>
+            
+            <button class="btn btn-info w-100 fw-bold" onclick="handleLogin()">Sign In</button>
+
+            <div class="mt-4 p-3 bg-white bg-opacity-10 rounded text-start small">
+                <div class="mb-1"><i class="bi bi-file-earmark-code"></i> Data: tasheer_data.json</div>
+                <input type="file" id="file-input" class="form-control form-control-sm mt-2" accept=".json">
+            </div>
+        </div>
+    </div>
+
+    <!-- APP WRAPPER -->
+    <div id="app-wrapper" style="display: flex; height: 100%; opacity: 0; pointer-events: none; transition: opacity 0.5s;">
+        
+        <!-- NEW SIDEBAR STRUCTURE (Based on "Next" Code) -->
+        <aside class="sidebar">
+            
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 bg-primary text-white d-flex align-items-center justify-content-center"
+                         style="width:32px;height:32px;">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="font-size:0.95rem;">Tasheer DMI</div>
+                        <div class="text-muted" style="font-size:0.75rem;">Admin Dashboard</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Controls (Slider) -->
+            <div class="sidebar-controls">
+                <input type="range" class="form-range" id="sidebarWidthSlider" min="250" max="450" value="350">
+            </div>
+  
+            <!-- Company Overall Link -->
+            <div class="company-overall-link">
+                <a href="javascript:void(0)" id="companyOverallLink" 
+                   class="nav-link overall-link d-flex justify-content-between align-items-center" 
+                   onclick="selectCompanyOverall()">
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-building"></i>
+                        <span>Tasheer Company Overall</span>
+                    </span>
+                    <span class="badge rounded-pill bg-light text-primary small" id="companyOverallBadge">–</span>
+                </a>
+                <div class="department-separator" style="margin-top: 5px;"></div>
+            </div>
+
+            <!-- Dynamic Hierarchy List -->
+            <nav id="adminDeptList" class="nav flex-column mt-2 pb-4">
+                <!-- Populated by JS -->
+            </nav>
+
+            <!-- User Profile Footer -->
+            <div class="user-profile text-white small" style="margin-top: auto;">
+                <div class="fw-bold" id="sidebar-username">Admin</div>
+                <div class="opacity-50 mb-2" id="sidebar-role">System Admin</div>
+                <a href="#" onclick="handleLogout()" class="text-danger small"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            
+            <!-- Top Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0" id="main-breadcrumb"><li class="breadcrumb-item">Home</li></ol></nav>
+                <button class="btn btn-outline-primary btn-sm" onclick="exportDataToFile()"><i class="bi bi-download"></i> Export JSON</button>
+            </div>
+
+            <!-- VIEW 1: EXECUTIVE DASHBOARD (Charts) -->
+            <div id="view-dashboard-exec">
+                <h2 class="fw-bold mb-4">Executive Overview</h2>
+                
+                <!-- Key Metrics -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card d-flex align-items-center">
+                            <div class="fs-1 text-primary me-3"><i class="bi bi-activity"></i></div>
+                            <div>
+                                <div class="text-muted small">Total Score</div>
+                                <div class="fs-3 fw-bold" id="exec-total-score">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card d-flex align-items-center">
+                            <div class="fs-1 text-success me-3"><i class="bi bi-check-circle"></i></div>
+                            <div>
+                                <div class="text-muted small">Completion</div>
+                                <div class="fs-3 fw-bold" id="exec-completion">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card d-flex align-items-center">
+                            <div class="fs-1 text-warning me-3"><i class="bi bi-list-check"></i></div>
+                            <div>
+                                <div class="text-muted small">Questions</div>
+                                <div class="fs-3 fw-bold" id="exec-total-q">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card d-flex align-items-center">
+                            <div class="fs-1 text-danger me-3"><i class="bi bi-exclamation-triangle"></i></div>
+                            <div>
+                                <div class="text-muted small">Alerts</div>
+                                <div class="fs-3 fw-bold">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="stat-card mb-4">
+                            <h6 class="fw-bold mb-3">Maturity by Dimension</h6>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="barChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="stat-card">
+                            <h6 class="fw-bold mb-3">Maturity Radar</h6>
+                            <div class="chart-container">
+                                <canvas id="radarChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: ASSESSMENT NAVIGATION (Drilldown) -->
+            <div id="view-dashboard" class="hidden">
+                <h2 class="fw-bold mb-1">Assessments</h2>
+                <p class="text-secondary mb-4">Select a dimension to begin.</p>
+                <div class="row g-4" id="dimensions-grid"></div>
+            </div>
+
+            <!-- VIEW 3: QUESTION LIBRARY (Flat Table) -->
+            <div id="view-library" class="hidden">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">Question Library</h2>
+                    <div>
+                        <input type="text" class="form-control d-inline-block w-auto me-2" placeholder="Search questions..." id="lib-search" onkeyup="filterLibrary()">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQModal"><i class="bi bi-plus-lg"></i> New</button>
+                    </div>
+                </div>
+                <div class="custom-table-container">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Dimension</th>
+                                <th>Question Text</th>
+                                <th>Group</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="library-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW 4: LIST (Pillars/Groups) -->
+            <div id="view-list" class="hidden">
+                <h3 class="fw-bold mb-3" id="list-title">Selection</h3>
+                <div class="custom-table-container" id="list-container"></div>
+            </div>
+
+            <!-- VIEW 5: ASSESSMENT (Questions) -->
+            <div id="view-assessment" class="hidden">
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bold">Assessment</h2>
+                        <p class="text-secondary" id="assessment-subtitle">Group Name</p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <button class="btn btn-primary px-4" onclick="saveCurrentAssessment()">Save Progress</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-8" id="questions-container"></div>
+                    <div class="col-lg-4">
+                        <div class="stat-card sticky-top" style="top: 20px; z-index: 10;">
+                            <h6 class="fw-bold mb-3">Session Progress</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Answered</span>
+                                <span class="fw-bold" id="summary-answered">0</span>
+                            </div>
+                            <div class="progress mb-3" style="height: 8px;">
+                                <div id="summary-bar" class="progress-bar bg-primary" style="width: 0%"></div>
+                            </div>
+                            <div class="alert alert-light small border">
+                                <strong>Tip:</strong> Click levels to select. Selecting a low score may prompt for comments.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: AUDITOR MODE (Add Question) -->
+            <div id="view-auditor" class="hidden">
+                <h2 class="fw-bold mb-4">Auditor Dashboard</h2>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> The <strong>Question Library</strong> tab above now offers a master view for easier management. Use this page for rapid structural additions.
+                </div>
+                <div class="stat-card">
+                    <h5 class="fw-bold mb-3">Rapid Question Entry</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <select class="form-select" id="audit-dim" onchange="loadAuditPillars()"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="audit-pillar" onchange="loadAuditGroups()"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="audit-group"></select>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <textarea class="form-control" id="audit-q-text" rows="2" placeholder="Question Text"></textarea>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6"><input type="text" id="audit-l0" class="form-control form-control-sm" placeholder="L0: None"></div>
+                        <div class="col-6"><input type="text" id="audit-l1" class="form-control form-control-sm" placeholder="L1: Initial"></div>
+                        <div class="col-6"><input type="text" id="audit-l2" class="form-control form-control-sm" placeholder="L2: Dev"></div>
+                        <div class="col-6"><input type="text" id="audit-l3" class="form-control form-control-sm" placeholder="L3: Def"></div>
+                        <div class="col-6"><input type="text" id="audit-l4" class="form-control form-control-sm" placeholder="L4: Mng"></div>
+                        <div class="col-6"><input type="text" id="audit-l5" class="form-control form-control-sm" placeholder="L5: Opt"></div>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="submitAuditorForm()">Add Question</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Add Question Modal (For Library) -->
+    <div class="modal fade" id="addQModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Add to Library</h5></div>
+                <div class="modal-body">
+                    <form id="lib-form">
+                        <div class="mb-3">
+                            <label class="form-label">Dimension</label>
+                            <select class="form-select" id="lib-dim" onchange="loadLibPillars()"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pillar</label>
+                            <select class="form-select" id="lib-pillar" onchange="loadLibGroups()"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Group</label>
+                            <select class="form-select" id="lib-group"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Question</label>
+                            <textarea class="form-control" id="lib-q-text" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitLibForm()">Save Question</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- 1. DATA & CONFIG ---
+        const standardGroups = [
+            { id: 'strategy', name: 'Strategy' },
+            { id: 'capability', name: 'Capability' },
+            { id: 'operation', name: 'Operation' },
+            { id: 'services', name: 'Services' },
+            { id: 'technology', name: 'Technology' },
+            { id: 'beneficiary', name: 'Beneficiary' }
+        ];
+
+        // UPDATED: Removed 'Data & Analytics' dimension
+        const seedData = [
+            { id: 'ext_app', name: '1- External Application (40 points)', points: 40, pillars: [
+                { id: 'tasheer_branch_apps', name: '1.1 - Tasheer branch applications', groups: JSON.parse(JSON.stringify(standardGroups)) },
+                { id: 'national_integrations', name: '1.2 - National platform integrations', groups: JSON.parse(JSON.stringify(standardGroups)) }
+            ] },
+            { id: 'int_app', name: '2- Internal Applications (40 points)', points: 40, pillars: [
+                { id: 'sap_erp', name: '2.1 - SAP ERP and enterprise modules', groups: JSON.parse(JSON.stringify(standardGroups)) },
+                { id: 'itsm_onclick', name: '2.2 - ITSM services through OnClick', groups: JSON.parse(JSON.stringify(standardGroups)) }
+            ] },
+            { id: 'sec', name: '3- Security & Compliance (20 points)', points: 20, pillars: [
+                { id: 'regulatory_alignment', name: '3.1 - Regulatory alignment', groups: JSON.parse(JSON.stringify(standardGroups)) },
+                { id: 'continuous_monitoring', name: '3.2 - Continuous monitoring', groups: JSON.parse(JSON.stringify(standardGroups)) }
+            ] },
+            { id: 'mon', name: '4- Monitoring & Controls (40 points)', points: 40, pillars: [
+                { id: 'dev_ops_coverage', name: '4.1 - Development to operations coverage', groups: JSON.parse(JSON.stringify(standardGroups)) },
+                { id: 'system_observability', name: '4.2 - System observability and Infrastructure usage', groups: JSON.parse(JSON.stringify(standardGroups)) }
+            ] },
+            { id: 'inn', name: '5- Innovation & Edge Technology (10 points)', points: 10, pillars: [
+                { id: 'emerging_tech', name: '5.1 - Emerging technologies', groups: JSON.parse(JSON.stringify(standardGroups)) },
+                { id: 'edge_computing', name: '5.2 - Edge computing', groups: JSON.parse(JSON.stringify(standardGroups)) }
+            ] }
+        ];
+
+        let appData = [];
+        let userResponses = {};
+        let currentUser = null;
+        let currentPath = { dimIdx: null, pillarIdx: null, groupIdx: null };
+        let charts = {}; 
+
+        // --- 2. INITIALIZATION ---
+        async function loadData() {
+            const stored = localStorage.getItem('tasheer_dmi_ent_v3'); // Version bumped to force reset
+            if (stored) return JSON.parse(stored);
+            try {
+                const response = await fetch('./tasheer_data.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('tasheer_dmi_ent_v3', JSON.stringify(data));
+                    return data;
+                }
+            } catch (e) {}
+            return seedData;
+        }
+
+        async function initApp() {
+            appData = await loadData();
+            seedStructureOnly();
+            saveData();
+
+            const storedResponses = localStorage.getItem('tasheer_resp_ent_v3'); // Version bumped
+            if (storedResponses) userResponses = JSON.parse(storedResponses);
+
+            const userSession = sessionStorage.getItem('tasheer_user_ent_v3');
+            if (userSession) {
+                currentUser = JSON.parse(userSession);
+                showApp();
+            }
+        }
+
+        function seedStructureOnly() {
+            appData.forEach(dim => {
+                dim.pillars.forEach(pillar => {
+                    pillar.groups.forEach(group => {
+                        if (!group.questions) group.questions = [];
+                    });
+                });
+            });
+        }
+
+        // --- 3. CORE UI LOGIC ---
+        function saveData() { localStorage.setItem('tasheer_dmi_ent_v3', JSON.stringify(appData)); }
+        function saveResponses() { localStorage.setItem('tasheer_resp_ent_v3', JSON.stringify(userResponses)); }
+
+        function handleLogin() {
+            const u = document.getElementById('login-user').value.toLowerCase();
+            const p = document.getElementById('login-pass').value;
+            if (u === 'admin' && p === 'admin123') {
+                currentUser = { username: 'Admin', role: 'admin' };
+                sessionStorage.setItem('tasheer_user_ent_v3', JSON.stringify(currentUser));
+                showApp();
+            } else if (u === 'user' && p === 'user123') {
+                currentUser = { username: 'User', role: 'user' };
+                sessionStorage.setItem('tasheer_user_ent_v3', JSON.stringify(currentUser));
+                showApp();
+            }
+        }
+
+        function showApp() {
+            document.getElementById('login-container').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('app-wrapper').classList.add('active');
+                document.getElementById('sidebar-username').innerText = currentUser.username;
+                
+                if (currentUser.role !== 'admin') {
+                    document.getElementById('nav-library')?.classList.add('hidden');
+                    document.getElementById('nav-auditor')?.classList.add('hidden');
+                }
+                
+                // RENDER THE NEW SIDEBAR HIERARCHY
+                renderAdminSidebar();
+                renderDashboardExec(); // Default to Analytics
+            }, 500);
+        }
+
+        function handleLogout() { sessionStorage.removeItem('tasheer_user_ent_v3'); location.reload(); }
+        
+        // File Upload
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (Array.isArray(json)) {
+                        appData = json; seedStructureOnly(); saveData();
+                        alert("Imported!");
+                    }
+                } catch (err) { alert("Invalid JSON"); }
+            };
+            reader.readAsText(file);
+        });
+
+        function switchView(viewId) {
+            document.querySelectorAll('[id^="view-dashboard"], [id^="view-list"], [id^="view-assessment"], [id^="view-library"], [id^="view-auditor"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // --- 4. NEW SIDEBAR RENDER LOGIC (Like "Next" Code) ---
+        function renderAdminSidebar() {
+            const list = document.getElementById("adminDeptList");
+            list.innerHTML = "";
+
+            // Calculate Company Overall Score
+            const overallPct = computeTasheerOverallDMI();
+            document.getElementById('companyOverallBadge').textContent = overallPct ? overallPct + "%" : "N/A";
+
+            // Build Hierarchy: Dimensions -> Pillars
+            // Dimensions map to "Divisions", Pillars map to "Departments"
+            let isFirst = true;
+
+            appData.forEach((dim, dIdx) => {
+                // Render Dimension Header
+                const dimHeader = document.createElement("div");
+                dimHeader.className = "division-header";
+                dimHeader.id = `header-${dim.id}`;
+                dimHeader.dataset.code = dim.id;
+                dimHeader.innerHTML = `
+    <span class="d-flex align-items-center gap-2">
+        <i class="bi bi-box-seam"></i>
+        <span>${dim.name}</span>
+    </span>
+    <span class="d-flex align-items-center gap-2">
+        <span class="division-average">${overallPct || 0}%</span>
+        <i class="bi bi-chevron-down division-toggle expanded"></i>
+    </span>
+`;
+                
+                list.appendChild(dimHeader);
+
+                // Container for Pillars (Departments)
+                const deptContainer = document.createElement("div");
+                deptContainer.id = `dept-container-${dim.id}`;
+                list.appendChild(deptContainer); // Start expanded
+
+                dim.pillars.forEach((pillar, pIdx) => {
+                    // Calculate Pillar Score (mapped to Department Average)
+                    const pillarAverage = computePillarAverage(dim.id, pIdx);
+                    
+                    const item = document.createElement("a");
+                    item.href = "javascript:void(0)";
+                    item.className = "nav-link d-flex justify-content-between align-items-center"; // Add flex classes
+                    item.dataset.code = pillar.id;
+                    item.dataset.parentCode = dim.id; // For tracking structure
+                    item.innerHTML = `
+                        <span class="d-flex align-items-center gap-2">
+                            <i class="bi bi-layers"></i>
+                            <span>${pillar.name}</span>
+                        </span>
+                        <span class="badge rounded-pill bg-light text-primary small">${pillarAverage}</span>
+                    `;
+                    
+                    // Click Action: Opens the Pillar View
+                    item.onclick = () => renderPillars(dIdx);
+                    
+                    deptContainer.appendChild(item);
+                });
+
+                // Add Separator if needed
+                if(isFirst) { isFirst = false; }
+                else {
+                    const separator = document.createElement("div");
+                    separator.className = "department-separator";
+                    list.appendChild(separator);
+                }
+                
+                // Add click event for Dimension collapse/expand
+                dimHeader.addEventListener('click', (e) => {
+                    const icon = dimHeader.querySelector('.division-toggle');
+                    if (deptContainer.style.display === 'none') {
+                        deptContainer.style.display = ''; // Show
+                        icon.classList.remove('collapsed');
+                        icon.classList.add('expanded');
+                    } else {
+                        deptContainer.style.display = 'none'; // Hide
+                        icon.classList.remove('expanded');
+                        icon.classList.add('collapsed');
+                    }
+                });
+            });
+        }
+
+        function computePillarAverage(dimId, pIdx) {
+            // Helper to calculate score for a specific pillar
+            // Logic: Sum answers in all groups of this pillar / (Q count * 5)
+            const pillar = appData[dimId].pillars[pIdx];
+            let totalPoints = 0;
+            let answeredCount = 0;
+            let totalQuestions = 0;
+
+            pillar.groups.forEach(group => {
+                if(group.questions) {
+                    group.questions.forEach(q => {
+                        totalQuestions++;
+                        if(userResponses[q.id] !== undefined) {
+                            answeredCount++;
+                            totalPoints += parseInt(userResponses[q.id]);
+                        }
+                    });
+                }
+            });
+
+            const maxScore = totalQuestions * 5;
+            if (maxScore === 0) return "N/A";
+            const pct = Math.round((totalPoints / maxScore) * 100);
+            return pct + "%";
+        }
+
+        // --- 5. EXECUTIVE DASHBOARD (Analytics) ---
+        function renderDashboardExec() {
+            switchView('view-dashboard-exec');
+            
+            // Calculate Stats
+            let totalQ = 0;
+            let answeredQ = 0;
+            let totalScore = 0;
+            let dimScores = [];
+            let dimLabels = [];
+
+            appData.forEach(dim => {
+                let dimMax = dim.points * 5;
+                let dimRawSum = 0;
+                let dimCount = 0;
+
+                dim.pillars.forEach(pillar => {
+                    pillar.groups.forEach(group => {
+                        group.questions.forEach(q => {
+                            totalQ++;
+                            if(userResponses[q.id] !== undefined) {
+                                answeredQ++;
+                                const score = parseInt(userResponses[q.id]);
+                                dimRawSum += score;
+                                dimCount++;
+                            }
+                        });
+                    });
+                });
+
+                let weightedScore = 0;
+                if(dimCount > 0) {
+                    const avgLevel = dimRawSum / dimCount;
+                    weightedScore = (avgLevel / 5) * dim.points;
+                }
+                
+                dimScores.push(weightedScore);
+                dimLabels.push(dim.name);
+                totalScore += weightedScore;
+            });
+
+            // Update DOM
+            document.getElementById('exec-total-score').innerText = Math.round(totalScore);
+            document.getElementById('exec-completion').innerText = Math.round((answeredQ/totalQ)*100) + '%';
+            document.getElementById('exec-total-q').innerText = totalQ;
+
+            // Render Charts (Destroy old first if exist)
+            renderCharts(dimScores, dimLabels);
+        }
+
+        function renderCharts(data, labels) {
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+
+            if(charts.bar) charts.bar.destroy();
+            if(charts.radar) charts.radar.destroy();
+
+            charts.bar = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Current Score',
+                        data: data,
+                        backgroundColor: '#004d9c', // Primary Blue from ref
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 50 } } 
+                }
+            });
+
+            charts.radar = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Maturity',
+                        data: data,
+                        backgroundColor: 'rgba(0, 77, 156, 0.2)',
+                        borderColor: '#004d9c',
+                        pointBackgroundColor: '#004d9c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function computeTasheerOverallDMI() {
+             // Returns global percentage
+             let totalQ = 0;
+            let answeredQ = 0;
+            let totalPoints = 0;
+            
+            appData.forEach(dim => {
+                dim.pillars.forEach(pillar => {
+                    pillar.groups.forEach(group => {
+                        group.questions.forEach(q => {
+                            totalQ++;
+                            if(userResponses[q.id] !== undefined) {
+                                answeredQ++;
+                                totalPoints += parseInt(userResponses[q.id]);
+                            }
+                        });
+                    });
+                });
+            });
+
+            const maxScore = totalQ * 5;
+            return Math.round((totalPoints / maxScore) * 100);
+        }
+
+        function selectCompanyOverall() {
+            // Click handler for "Company Overall"
+            renderDashboardExec();
+        }
+
+
+        // --- 6. QUESTION LIBRARY (Flat Table) ---
+        function renderLibrary() {
+            switchView('view-library');
+            filterLibrary();
+        }
+
+        function filterLibrary() {
+            const term = document.getElementById('lib-search').value.toLowerCase();
+            const tbody = document.getElementById('library-tbody');
+            tbody.innerHTML = '';
+
+            appData.forEach((dim, dIdx) => {
+                dim.pillars.forEach((pillar, pIdx) => {
+                    pillar.groups.forEach((group, gIdx) => {
+                        group.questions.forEach((q, qIdx) => {
+                            if(q.text.toLowerCase().includes(term)) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td class="small text-muted">${q.id}</td>
+                                    <td>${dim.name}</td>
+                                    <td>${q.text}</td>
+                                    <td><span class="badge bg-light text-dark border">${group.name}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion('${q.id}')"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                `;
+                                tbody.appendChild(tr);
+                            }
+                        });
+                    });
+                });
+            });
+            if(tbody.innerHTML === '') tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">No questions found.</td></tr>';
+        }
+
+        function deleteQuestion(id) {
+            if(!confirm("Delete this question?")) return;
+            appData.forEach(dim => {
+                dim.pillars.forEach(pillar => {
+                    pillar.groups.forEach(group => {
+                        group.questions = group.questions.filter(q => q.id !== id);
+                    });
+                });
+            });
+            saveData();
+            filterLibrary();
+            showToast("Question deleted.");
+        }
+
+        // Modal Logic
+        function loadLibPillars() {
+            const dIdx = document.getElementById('lib-dim').value;
+            const pSelect = document.getElementById('lib-pillar');
+            pSelect.innerHTML = '';
+            if(dIdx !== "") appData[dIdx].pillars.forEach((p, i) => pSelect.innerHTML += `<option value="${i}">${p.name}</option>`);
+        }
+        function loadLibGroups() {
+            const dIdx = document.getElementById('lib-dim').value;
+            const pIdx = document.getElementById('lib-pillar').value;
+            const gSelect = document.getElementById('lib-group');
+            gSelect.innerHTML = '';
+            if(dIdx !== "" && pIdx !== "") appData[dIdx].pillars[pIdx].groups.forEach((g, i) => gSelect.innerHTML += `<option value="${i}">${g.name}</option>`);
+        }
+        function submitLibForm() {
+            const dIdx = document.getElementById('lib-dim').value;
+            const pIdx = document.getElementById('lib-pillar').value;
+            const gIdx = document.getElementById('lib-group').value;
+            const text = document.getElementById('lib-q-text').value;
+            
+            if(dIdx==="" || pIdx==="" || gIdx==="" || !text) return alert("Fill all fields");
+
+            const newQ = {
+                id: Date.now().toString(),
+                text: text,
+                levels: ["Non-Existent", "Initial", "Developing", "Defined", "Managed", "Optimized"]
+            };
+            appData[dIdx].pillars[pIdx].groups[gIdx].questions.push(newQ);
+            saveData();
+            
+            // Close Modal
+            const modalEl = document.getElementById('addQModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            
+            filterLibrary();
+            showToast("Added to Library");
+        }
+
+        // --- 7. ASSESSMENT NAVIGATION (Existing) ---
+        function renderDashboard() {
+            switchView('view-dashboard');
+            const grid = document.getElementById('dimensions-grid');
+            grid.innerHTML = '';
+            appData.forEach((dim, index) => {
+                grid.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="stat-card" onclick="renderPillars(${index})">
+                            <h6 class="fw-bold">${dim.name}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-light text-dark border">${dim.points} pts</span>
+                                <i class="bi bi-arrow-right text-primary"></i>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderPillars(dimIdx) {
+            currentPath.dimIdx = dimIdx;
+            switchView('view-list');
+            const dim = appData[dimIdx];
+            document.getElementById('list-title').innerText = `${dim.name} : Key Focus Areas`;
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+            dim.pillars.forEach((pillar, pIdx) => {
+                container.innerHTML += `<div class="list-group-item list-item p-3" onclick="renderGroups(${dimIdx}, ${pIdx})"><h6 class="fw-bold mb-0">${pillar.name}</h6><small>6 Groups</small></div>`;
+            });
+        }
+
+        function renderGroups(dimIdx, pillarIdx) {
+            currentPath.pillarIdx = pillarIdx;
+            switchView('view-list');
+            const pillar = appData[dimIdx].pillars[pillarIdx];
+            document.getElementById('list-title').innerText = `${pillar.name} : Assessment Groups`;
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+            pillar.groups.forEach((group, gIdx) => {
+                let qCount = group.questions.length;
+                let answered = group.questions.filter(q => userResponses[q.id] !== undefined).length;
+                container.innerHTML += `
+                    <div class="list-group-item list-item p-3" onclick="renderQuestions(${dimIdx}, ${pillarIdx}, ${gIdx})">
+                        <div class="d-flex justify-content-between w-100">
+                            <h6 class="fw-bold mb-0">${group.name}</h6>
+                            <span class="badge bg-light text-dark">${answered}/${qCount}</span>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderQuestions(dimIdx, pillarIdx, groupIdx) {
+            currentPath.groupIdx = groupIdx;
+            switchView('view-assessment');
+            const group = appData[dimIdx].pillars[pillarIdx].groups[groupIdx];
+            document.getElementById('assessment-subtitle').innerText = `${appData[dimIdx].name} > ${appData[dimIdx].pillars[pillarIdx].name} > ${group.name}`;
+            
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            
+            if(!group.questions.length) {
+                container.innerHTML = '<div class="alert alert-warning">No questions available.</div>'; return;
+            }
+
+            let total = group.questions.length;
+            let answered = 0;
+
+            group.questions.forEach((q, qIdx) => {
+                if(userResponses[q.id] !== undefined) answered++;
+                const saved = userResponses[q.id];
+                const card = document.createElement('div');
+                card.className = 'stat-card mb-3 p-3';
+                
+                let buttons = '';
+                q.levels.forEach((l, i) => {
+                    const cl = saved == i ? 'selected level-'+i : '';
+                    buttons += `<div class="ms-btn ${cl}" onclick="setScore('${q.id}', ${i})"><strong>${i}</strong><br><small>${l.substring(0,8)}..</small></div>`;
+                });
+
+                card.innerHTML = `
+                    <h6 class="fw-bold mb-2">Q${qIdx+1}: ${q.text}</h6>
+                    <div class="maturity-scale">${buttons}</div>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('summary-answered').innerText = answered;
+            document.getElementById('summary-bar').style.width = (answered/total*100) + '%';
+        }
+
+        function setScore(qId, level) {
+            userResponses[qId] = level;
+            saveResponses();
+            // Re-render current view to show selection state (simplest way in vanilla JS)
+            renderQuestions(currentPath.dimIdx, currentPath.pillarIdx, currentPath.groupIdx);
+        }
+
+        function saveCurrentAssessment() {
+            saveResponses();
+            showToast("Progress Saved");
+        }
+
+        function showToast(msg) {
+            // Simple toast implementation
+            const div = document.createElement('div');
+            div.className = 'position-fixed bottom-0 end-0 p-3';
+            div.style.zIndex = 2000;
+            div.innerHTML = `<div class="toast show bg-dark text-white"><div class="toast-body">${msg}</div></div>`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2000);
+        }
+
+        // --- 8. AUDITOR MODE (Legacy Support) ---
+        function renderAuditor() {
+            switchView('view-auditor');
+            const dimSelect = document.getElementById('audit-dim');
+            dimSelect.innerHTML = '';
+            appData.forEach((d, i) => { dimSelect.innerHTML += `<option value="${i}">${d.name}</option>`; });
+        }
+        function loadAuditPillars() {
+            const dIdx = document.getElementById('audit-dim').value;
+            const pSelect = document.getElementById('audit-pillar');
+            pSelect.innerHTML = '';
+            if(dIdx !== "") appData[dIdx].pillars.forEach((p, i) => pSelect.innerHTML += `<option value="${i}">${p.name}</option>`);            
+            document.getElementById('audit-group').innerHTML = '';
+        }
+        function loadAuditGroups() {
+            const dIdx = document.getElementById('audit-dim').value;
+            const pIdx = document.getElementById('audit-pillar').value;
+            const gSelect = document.getElementById('audit-group');
+            gSelect.innerHTML = '';
+            if(dIdx !== "" && pIdx !== "") appData[dIdx].pillars[pIdx].groups.forEach((g, i) => gSelect.innerHTML += `<option value="${i}">${g.name}</option>`);
+        }
+        function submitAuditorForm() {
+            const dIdx = document.getElementById('audit-dim').value;
+            const pIdx = document.getElementById('audit-pillar').value;
+            const gIdx = document.getElementById('audit-group').value;
+            const text = document.getElementById('audit-q-text').value;
+            if(dIdx===""||pIdx===""||gIdx===""||!text) return alert("Fill fields");
+            
+            const newQ = {
+                id: Date.now().toString(),
+                text: text,
+                levels: ["None","Basic","Dev","Def","Mng","Opt"]
+            };
+            appData[dIdx].pillars[pIdx].groups[gIdx].questions.push(newQ);
+            saveData();
+            document.getElementById('audit-q-text').value = '';
+            showToast("Added");
+        }
+        function exportDataToFile() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "tasheer_data.json";
+            a.click();
+        }
+
+        // --- 9. SIDEBAR SLIDER LOGIC ---
+        function setupSidebarSlider() {
+            const slider = document.getElementById('sidebarWidthSlider');
+            if (slider) {
+                const root = document.documentElement;
+                slider.addEventListener('input', (e) => {
+                    const newWidth = e.target.value + 'px';
+                    root.style.setProperty('--sidebar-width', newWidth);
+                });
+            }
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            setupSidebarSlider();
+        });
+
+    </script>
+</body>
+</html>

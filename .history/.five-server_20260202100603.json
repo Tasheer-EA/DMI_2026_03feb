@@ -1,0 +1,16 @@
+{
+  "port": 3000,
+  "highlight": true,
+  "browser": "default",
+  "open": true,
+  "watch": true,
+  "ignore": [
+    ".git",
+    "node_modules",
+    ".vscode",
+    "**/*.scss",
+    "**/*.sass"
+  ],
+  "https": false,
+  "proxy": {}
+}

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasheer DMI | Corporate Dashboard</title>
+
+    <!-- External Resources -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --tasheer-blue: #004d9c;
+            --bg-soft: #f8fafc;
+            --text-main: #1e293b;
+        }
+
+        body {
+            background-color: var(--bg-soft);
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- VIEW: LOGIN (From Reference) --- */
+        #loginPage {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            width: 100%; max-width: 400px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+            color: white;
+            text-align: center;
+        }
+
+        .login-logo img {
+            height: 60px;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .login-text {
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        .form-group input::placeholder { color: rgba(255,255,255,0.6); }
+
+        .login-button {
+            width: 100%;
+            background: var(--tasheer-blue);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-button:hover { background: #003d82; }
+
+        .small-footer {
+            margin-top: 40px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .small-footer a { color: white; text-decoration: none; }
+        .small-footer a:hover { text-decoration: underline; }
+
+        /* --- VIEW: DASHBOARD (From Reference) --- */
+        .dashboard-header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ceo-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+            padding: 18px 20px;
+            height: 100%;
+        }
+
+        .display-2 { font-weight: 200; margin-bottom: 5px; color: var(--text-main); }
+        .text-muted { color: #6b7280; }
+        
+        /* Progress Components */
+        .progress { height: 8px; border-radius: 10px; background: #e2e8f0; }
+        .progress-bar { background-color: var(--tasheer-blue); }
+        
+        .score-badge {
+            width: 55px;
+            font-weight: bold;
+            border-radius: 20px;
+            text-align: center;
+            padding: 8px;
+            font-size: 1.2rem;
+        }
+        .score-badge.high { background: #dc2626; color: white; }
+        .score-badge.med { background: var(--tasheer-blue); color: white; }
+        .score-badge.low { background: #f3f4f6; color: #d97706; }
+
+        .div-header {
+            background: var(--tasheer-blue);
+            color: white;
+            font-weight: 700;
+            padding: 12px 15px;
+            text-transform: none;
+            border-radius: 8px;
+        }
+        
+        .unit-header {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #334155;
+            border-left: 5px solid var(--tasheer-blue);
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sub-dept { padding-left: 45px !important; font-size: 0.9rem; border-bottom: 1px solid #f8fafc; }
+        .sub-dept:last-child { border-bottom: none; }
+
+        .table { border-collapse: collapse; width: 100%; }
+        .table th { padding: 12px; font-weight: 600; border-bottom: 2px solid #e2e8f0; color: #6b7280; text-align: left; }
+        .table td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .table-hover tbody tr:hover { background-color: #f1f5f9; cursor: default; }
+
+        .unit-chart-container { position: relative; height: 200px; }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        .text-end { text-align: right; }
+        .text-center { text-align: center; }
+        .text-muted { color: #94a3b8; font-size: 0.85rem; }
+        .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; }
+        .bg-light { background: #f8fafc; }
+        .text-dark { color: #0f172a; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN PAGE VIEW -->
+    <div id="loginPage">
+        <div class="login-container">
+            <div class="login-logo">
+                <!-- Ensure you have this file, otherwise it won't show -->
+                <img src="assets/img/company-logo.png" alt="Tasheer" onerror="this.style.display='none'">
+            </div>
+            <h2 class="login-title">Tasheer Digital Maturity Index</h2>
+            <p class="login-text">
+                Please sign in with your assigned department username and password.
+            </p>
+            <div class="form-group">
+                <input id="username" type="text" placeholder="e.g. procurement" />
+            </div>
+            <div class="form-group">
+                <input id="password" type="password" placeholder="•••••••••••" />
+            </div>
+            <button class="login-button" onclick="handleLogin()">
+                <div class="login-icon"><i class="fa fa-lock-open"></i></div>
+                LOGIN
+            </button>
+            <div id="loginMessage"></div>
+            <p class="small-footer">
+                © 2025 Tasheer Digitalization & Technology Division. EA Department. All rights reserved.
+            </p>
+            <p class="small-footer">
+                Need access? contact: <a href="mailto:afeky@tasheer.com">afeky@tasheer.com</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. DASHBOARD VIEW (Simulated for visual check) -->
+    <!-- Note: In a real scenario, this replaces the index.html view completely. -->
+    <div id="dashboardPage" class="container-fluid py-4 hidden">
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 class="fw-bold text-primary mb-0">Tasheer Corporate DMI</h1>
+                        <p class="text-muted mb-0">Live Executive Maturity Audit</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary me-2" onclick="location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> Sync Data
+                        </button>
+                        <button class="btn btn-primary" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Row: Key Metrics -->
+        <div class="row g-4 mb-4">
+            <!-- Overall Card -->
+            <div class="col-md-4">
+                <div class="ceo-card d-flex flex-column justify-content-center align-items-center text-center">
+                    <h6 class="text-uppercase small fw-bold text-muted mb-2">Overall Corporate Index</h6>
+                    <div class="display-2 fw-bold text-primary mb-2" id="global-avg-display">0%</div>
+                    <div class="progress mb-3">
+                        <div id="global-progress-bar" class="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <span id="maturity-label" class="badge bg-secondary px-3 py-2">Waiting for Data...</span>
+                </div>
+            </div>
+
+            <!-- Ladder Gauge -->
+            <div class="col-md-4">
+                <div class="ceo-card d-flex flex-column justify-content-center align-items-center">
+                    <h6 class="text-uppercase small fw-bold text-muted mb-2">Total Answered</h6>
+                    <div class="unit-chart-container" id="ladderGauge" style="width: 120px; height: 160px; margin: 0 auto;"></div>
+                    <div class="text-muted small mt-2" id="cupLabel">Answered / Total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Row -->
+        <div class="row g-4 mb-4">
+            <!-- Radar Chart -->
+            <div class="col-md-4">
+                <div class="ceo-card">
+                    <h6 class="text-uppercase small fw-bold text-muted mb-3">Maturity Pillars Breakdown</h6>
+                    <canvas id="pillarChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="card overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light small text-uppercase fw-bold">
+                        <tr>
+                            <th style="width: 40%; text-align: left;">Organizational Hierarchy</th>
+                            <th style="width: 20%; text-align: center;">DMI Score</th>
+                            <th style="width: 20%;">Maturity Bar</th>
+                            <th>Classification</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-body">
+                        <!-- JS will populate this table with the specific rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Application Logic -->
+    <script>
+        // --- MOCKED USER DATA (Simulating users.js) ---
+        const MOCK_USERS = [
+            { username: 'admin', password: 'admin', role: 'admin' },
+            { username: 'procurement', password: 'procurement', role: 'dept_head' },
+            { username: 'tech_strategy', password: 'tech', role: 'dept_head' }
+        ];
+
+        // --- MOCKED DEPT CONFIG (Simulating logic.js) ---
+        // These match the codes used in the Dashboard HTML
+        const DEPT_CONFIG = [
+            // Division 1: Product & Business Development
+            { code: "business_dev", name: "Product & Business Development", isDivision: true },
+            { code: "marketing", name: "Marketing & Communication", parentCode: "business_dev" },
+            { code: "product_mgmt", name: "Product Management", parentCode: "business_dev" },
+            
+            // Division 2: Digitization & Technology
+            { code: "tech_strategy", name: "Tech Strategy & EA Unit", parentCode: "tech_strategy", isUnit: true },
+            { code: "sap_ERP", name: "SAP ERP", parentCode: "tech_strategy" },
+            { code: "tech_ITSM", name: "Tech & ITSM", parentCode: "tech_strategy" },
+            { code: "solution_delivery", name: "Solution Development & Delivery", parentCode: "tech_strategy" },
+            { code: "platforms_ops", name: "Platforms & IT Solution Ops", parentCode: "tech_strategy" },
+            { code: "infra_ops", name: "Infrastructure & Operations", parentCode: "tech_strategy" },
+            { code: "corporate_it", name: "Corporate IT", parentCode: "tech_strategy" },
+            { code: "data_analytics", name: "Data Analytics", parentCode: "tech_strategy" },
+
+            // Division 3: Shared Services
+            { code: "human_capital", name: "Human Capital Management", isDivision: true },
+            { code: "procurement", name: "Procurement", parentCode: "human_capital" },
+
+            // Standalone Departments
+            { code: "branches_ops", name: "Branches Operations", isDivision: true },
+            { code: "finance", name: "Finance", isDivision: true },
+            { code: "pmo", name: "PMO", isDivision: true },
+            { code: "internal_audit", name: "Internal Auditing", isDivision: true },
+            { code: "grc", name: "GRC", isDivision: true },
+            { code: "business_excellence", name: "Business Excellence", isDivision: true },
+            { code: "legal", name: "Legal & Regulatory", isDivision: true },
+            { code: "cybersecurity", name: "Cybersecurity", isDivision: true }
+        ];
+
+        // --- STATE ---
+        let currentUser = null;
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const sessionUser = sessionStorage.getItem('tasheer_user');
+            if (sessionUser) {
+                currentUser = JSON.parse(sessionUser);
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        });
+
+        // --- AUTH ---
+        function showLogin() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            renderDashboardData();
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            const user = MOCK_USERS.find(u => u === u.username && p === u.password);
+            if (user) {
+                currentUser = user;
+                sessionStorage.setItem('tasheer_user', JSON.stringify(user));
+                showDashboard();
+            } else {
+                const msg = document.getElementById('loginMessage');
+                msg.innerText = "Invalid username or password";
+                msg.style.color = "#ffcccc";
+                msg.className = "small mt-2";
+            }
+        }
+
+        // --- DASHBOARD LOGIC ---
+        function renderDashboardData() {
+            const tbody = document.getElementById('dashboard-body');
+            tbody.innerHTML = '';
+
+            let grandTotal = 0;
+            let deptCount = 0;
+            let techSum = 0; // Specific for unit average
+            let techCount = 0;
+
+            // Render Rows based on DEPT_CONFIG
+            DEPT_CONFIG.forEach(dept => {
+                // Get random score for demo purposes (0-100)
+                // In a real app, this comes from localStorage
+                const score = Math.floor(Math.random() * 30) + 50; 
+                
+                grandTotal += score;
+                deptCount++;
+
+                // Check if part of Tech Unit
+                if (dept.isUnit) {
+                    techSum += score;
+                    techCount++;
+                }
+
+                // Logic to create the visual table structure requested
+                let html = '';
+                
+                if (dept.isDivision) {
+                    // Division Header
+                    html += `<tr class="div-header"><td colspan="4">${dept.name}</td></tr>`;
+                    
+                    // Render Children
+                    const children = DEPT_CONFIG.filter(d => d.parentCode === dept.code);
+                    children.forEach(child => {
+                         // Calculate score for child (random for demo)
+                         const childScore = Math.floor(Math.random() * 30) + 50;
+                         grandTotal += childScore;
+                         deptCount++;
+
+                         // Render Child Row
+                         html += `
+                            <tr class="dept-row" data-dept="${child.code}">
+                                <td style="${dept.isUnit ? '' : 'padding-left: 45px !important;'} font-size: 0.9rem;">
+                                    ${dept.isUnit ? '' : '&rarr; '} ${child.name}
+                                </td>
+                                <td class="text-center"><span class="badge score-badge ${getBadgeClass(childScore)}">${childScore}%</span></td>
+                                <td><div class="progress"><div class="progress-bar ${getBadgeClass(childScore)}" style="width: ${childScore}%"></div></td>
+                                <td><span class="small fw-bold">${getMaturityText(childScore)}</span></td>
+                            </tr>
+                         `;
+                    });
+
+                    // Add Separator if needed (visual break)
+                    html += `<tr><td colspan="4" style="border:none; height:10px;"></td></tr>`;
+                } else {
+                    // Standalone Dept Row
+                    html += `
+                        <tr class="dept-row" data-dept="${dept.code}">
+                            <td class="ps-4">${dept.name}</td>
+                            <td class="text-center"><span class="badge score-badge ${getBadgeClass(score)}">${score}%</span></td>
+                            <td><div class="progress"><div class="progress-bar ${getBadgeClass(score)}" style="width: ${score}%"></div></td>
+                            <td><span class="small fw-bold">${getMaturityText(score)}</span></td>
+                        </tr>
+                    `;
+                }
+
+                // Special case: Tech Unit Header (if it's a child of Digitization)
+                // Note: This is a static implementation based on the HTML structure requested
+                if (dept.code === 'tech_strategy' && !dept.isDivision) {
+                     // This logic handles the specific 'Unit Avg' line required in the HTML
+                }
+
+                tbody.innerHTML += html;
+            });
+
+            // Calculate Averages
+            const finalAvg = Math.round(grandTotal / deptCount);
+            const techAvg = techCount > 0 ? Math.round(techSum / techCount) : 0;
+
+            // Update Top Row
+            document.getElementById('global-avg-display').innerText = finalAvg + "%";
+            document.getElementById('global-progress-bar').style.width = finalAvg + "%";
+            
+            // Update Unit Avg Text
+            const unitLabel = document.getElementById('unit-avg-tech');
+            if (unitLabel) {
+                unitLabel.innerText = `(Unit Avg: ${techAvg}%)`;
+            }
+
+            // Update Label
+            const labelEl = document.getElementById('maturity-label');
+            labelEl.innerText = getMaturityText(finalAvg);
+
+            // Render Ladder Gauge (SVG)
+            renderLadderGauge(deptCount, Math.floor(Math.random() * deptCount)); // Random completion for demo
+
+            // Render Radar Chart
+            renderRadarChart();
+        }
+
+        // --- VISUAL COMPONENTS ---
+        function renderLadderGauge(total, answered) {
+            const svg = document.getElementById('ladderGauge');
+            svg.innerHTML = "";
+            
+            if (total === 0) return;
+
+            const visualTotal = total > 20 ? 20 : total; 
+            const visualAnswered = total > 20 ? Math.round((answered / total) * 20) : answered;
+            const gap = 4;
+            const barHeight = (svg.clientHeight - ((visualTotal - 1) * gap)) / visualTotal;
+
+            const ns = "http://www.w3.org/2000/svg";
+
+            // Draw Steps from Bottom to Top
+            for (let i = 0; i < visualTotal; i++) {
+                const isCompleted = i < visualAnswered;
+                
+                const y = svg.clientHeight - ((i + 1) * barHeight) - (i * gap);
+
+                const rect = document.createElementNS(ns, "rect");
+                rect.setAttribute("x", 20); // Centered horizontally
+                rect.setAttribute("y", y);
+                rect.setAttribute("width", 80);
+                rect.setAttribute("height", barHeight);
+                rect.setAttribute("rx", 3);
+                rect.setAttribute("fill", isCompleted ? "#004d9c" : "#e2e8f0"); // Blue if completed
+                
+                const title = document.createElementNS(ns, "title");
+                title.textContent = isCompleted ? "Completed" : "Pending";
+                rect.appendChild(title);
+
+                svg.appendChild(rect);
+            }
+            
+            // Text Overlay
+            const text = document.createElementNS(ns, "text");
+            text.setAttribute("x", 60);
+            text.setAttribute("y", svg.clientHeight / 2 + 5);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-weight", "bold");
+            text.setAttribute("font-size", "24");
+            text.setAttribute("fill", "#1e293b");
+            text.setAttribute("style", "text-shadow: 0px 0px 4px rgba(255,255,255,0.8); pointer-events: none;");
+            text.textContent = `${answered}/${total}`;
+            svg.appendChild(text);
+        }
+
+        function renderRadarChart() {
+            const ctx = document.getElementById('pillarChart').getContext('2d');
+            
+            // Create Chart Instance if it doesn't exist
+            if (window.radarChartInstance) {
+                window.radarChartInstance.destroy();
+            }
+
+            window.radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Automation', 'Workflow', 'Channels', 'Analytics', 'Governance', 'Innovation'],
+                    datasets: [{
+                        label: 'Score %',
+                        data: [65, 59, 72, 80, 55, 70],
+                        backgroundColor: 'rgba(0, 77, 156, 0.2)',
+                        borderColor: '#004d9c',
+                        pointBackgroundColor: '#004d9c',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // --- HELPERS ---
+        function getBadgeClass(score) {
+            if (score >= 75) return 'high'; // Green
+            if (score >= 50) return 'med'; // Blue
+            return 'low'; // Yellow/Orange
+        }
+
+        function getMaturityText(score) {
+            if (score >= 75) return 'Advanced';
+            if (score >= 50) return 'Managed';
+            if (score >= 25) return 'Defined';
+            return 'Ad-hoc';
+        }
+    </script>
+</body>
+</html>

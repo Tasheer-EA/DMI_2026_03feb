@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasheer DMI 2026 | Professional Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sidebar-bg: #f8fafc;
+            --sidebar-text: #475569;
+            --accent-color: #2563eb;
+            --bg-body: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        body { background-color: var(--bg-body); font-family: 'Cairo', sans-serif; color: #1e293b; overflow: hidden; height: 100vh; font-weight: 400; }
+        /* ensure non-bold visuals */
+        .fw-bold, strong, b { font-weight: 400 !important; }
+        
+        /* Presentation Mode Toggle */
+        body.presentation-mode .sidebar, body.presentation-mode .breadcrumb, body.presentation-mode .btn-outline-primary { display: none !important; }
+        body.presentation-mode .main-content { padding: 50px; }
+        
+        #app-wrapper { display: flex; height: 100%; opacity: 0; transition: 0.5s; }
+        #app-wrapper.active { opacity: 1; }
+
+        .sidebar { width: 340px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column; }
+        .nav-link { color: var(--sidebar-text); padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; text-decoration: none; transition: 0.2s; }
+        .nav-link.active { background: var(--accent-color); color: white; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 30px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+        /* Maturity Scale */
+        .ms-btn { flex: 1; padding: 10px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; border-radius: 6px; font-size: 0.8rem; }
+        .ms-btn.selected.level-0 { background: #f87171; color: white; }
+        .ms-btn.selected.level-1 { background: #fb923c; color: white; }
+        .ms-btn.selected.level-2 { background: #facc15; color: white; }
+        .ms-btn.selected.level-3 { background: #4ade80; color: white; }
+        .ms-btn.selected.level-4 { background: #60a5fa; color: white; }
+        .ms-btn.selected.level-5 { background: #1e293b; color: white; }
+
+        .evidence-box { margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 10px; }
+        .mandatory-alert { border: 2px solid #f87171 !important; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+ 
+
+    <div id="app-wrapper">
+        <aside class="sidebar">
+            <div class="fw-bold text-primary mb-4"><i class="bi bi-shield-check"></i> DMI 2026</div>
+            <nav class="flex-grow-1">
+                <a href="#" class="nav-link active" onclick="renderExec()"><i class="bi bi-graph-up"></i> Dashboard</a>
+                <a href="#" class="nav-link" onclick="renderAssessments()"><i class="bi bi-pencil-square"></i> Assessment</a>
+                <a href="#" class="nav-link" onclick="togglePresentation()"><i class="bi bi-projector"></i> Presentation Mode</a>
+            </nav>
+            <div class="mt-auto pt-3 border-top small">
+                <div id="user-display" class="fw-bold">Admin</div>
+                <a href="#" onclick="location.reload()" class="text-danger text-decoration-none">Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="view-exec">
+                <h2 class="fw-bold mb-4">Executive Oversight</h2>
+                <div class="row g-4 mb-4" id="exec-stats"></div>
+                <div class="row g-4">
+                    <div class="col-lg-8"><div class="stat-card"><canvas id="barChart" height="250"></canvas></div></div>
+                    <div class="col-lg-4"><div class="stat-card"><canvas id="radarChart" height="250"></canvas></div></div>
+                </div>
+            </div>
+
+            <div id="view-assess" class="hidden">
+                <h2 class="fw-bold mb-4">Maturity Assessment</h2>
+                <div id="assess-grid" class="row g-3"></div>
+            </div>
+
+            <div id="view-questions" class="hidden">
+                <button class="btn btn-sm btn-light mb-3" onclick="renderAssessments()"><i class="bi bi-arrow-left"></i> Back</button>
+                <div id="q-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // BDR Fixed Dimensions [cite: 201, 583]
+        const appData = [
+            { name: "1- External Application (40 points)", points: 40, pillars: ["1.1 - Tasheer branch applications", "1.2 - National platform integrations"] },
+            { name: "2- Internal Applications (40 points)", points: 40, pillars: ["2.1 - SAP ERP and enterprise modules", "2.2 - ITSM services through OnClick"] },
+            { name: "3- Security & Compliance (20 points)", points: 20, pillars: ["3.1 - Regulatory alignment", "3.2 - Continuous monitoring"] },
+            { name: "4- Monitoring & Controls (40 points)", points: 40, pillars: ["4.1 - Development to operations coverage", "4.2 - System observability and Infrastructure usage"] },
+            { name: "5- Innovation & Edge Technology (10 points)", points: 10, pillars: ["5.1 - Emerging technologies", "5.2 - Edge computing"] }
+        ];
+
+        let responses = JSON.parse(localStorage.getItem('dmi_resp')) || {};
+        let evidence = JSON.parse(localStorage.getItem('dmi_evid')) || {};
+        let charts = {};
+
+
+
+        function togglePresentation() {
+            document.body.classList.toggle('presentation-mode');
+        }
+
+        function renderExec() {
+            showView('view-exec');
+            let total = 0;
+            appData.forEach((d, i) => {
+                let dScore = 0, count = 0;
+                d.pillars.forEach(p => {
+                    const id = `${i}-${p}`;
+                    if(responses[id] !== undefined) { dScore += responses[id]; count++; }
+                });
+                total += count > 0 ? (dScore / (d.pillars.length * 5)) * d.points : 0;
+            });
+
+            document.getElementById('exec-stats').innerHTML = `
+                <div class="col-md-4"><div class="stat-card"><h5>Total Index</h5><p class="fs-2 fw-bold text-primary">${total.toFixed(1)} / 150</p></div></div>
+                <div class="col-md-4"><div class="stat-card"><h5>Progress</h5><p class="fs-2 fw-bold">${Object.keys(responses).length} / 30</p></div></div>
+                <div class="col-md-4"><div class="stat-card"><h5>Status</h5><p class="fs-2 fw-bold text-success">Active</p></div></div>
+            `;
+            updateCharts();
+        }
+
+        function updateCharts() {
+            const ctxBar = document.getElementById('barChart');
+            const labels = appData.map(d => d.name);
+            const data = appData.map((d, i) => {
+                let s = 0; d.pillars.forEach(p => s += (responses[`${i}-${p}`] || 0));
+                return (s / (d.pillars.length * 5)) * d.points;
+            });
+
+            if(charts.bar) charts.bar.destroy();
+            charts.bar = new Chart(ctxBar, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Weighted Score', data, backgroundColor: '#2563eb' }] },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        function renderAssessments() {
+            showView('view-assess');
+            const grid = document.getElementById('assess-grid');
+            grid.innerHTML = appData.map((d, i) => `
+                <div class="col-md-6">
+                    <div class="stat-card" onclick="renderQuestions(${i})">
+                        <h5 class="fw-bold">${d.name}</h5>
+                        <p class="text-muted small">${d.points} Points Allotted</p>
+                        <div class="progress" style="height: 5px;"><div class="progress-bar" style="width: 50%"></div></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderQuestions(idx) {
+            showView('view-questions');
+            const dim = appData[idx];
+            const container = document.getElementById('q-container');
+            container.innerHTML = `<h3 class="fw-bold mb-4">${dim.name}</h3>`;
+
+            dim.pillars.forEach(p => {
+                const id = `${idx}-${p}`;
+                const score = responses[id];
+                const evid = evidence[id] || "";
+                const isMandatory = (score !== undefined && score < 3 && evid.length < 5);
+
+                const card = document.createElement('div');
+                card.className = 'stat-card mb-4';
+                card.innerHTML = `
+                    <h6>${p} Maturity Level</h6>
+                    <div class="d-flex gap-2 mt-3">
+                        ${[0,1,2,3,4,5].map(v => `<div class="ms-btn ${score == v ? 'selected level-'+v : ''}" onclick="setScore('${id}', ${v}, ${idx})">${v}</div>`).join('')}
+                    </div>
+                    <div class="evidence-box">
+                        <label class="small fw-bold text-muted">Findings & Evidence (Required for < 3)</label>
+                        <textarea class="form-control mt-1 ${isMandatory ? 'mandatory-alert' : ''}" 
+                                  placeholder="Document IDs, policy references, or justifications..."
+                                  onchange="saveEvidence('${id}', this.value, ${idx})">${evid}</textarea>
+                        <div class="text-end small text-muted mt-1">${evid.length} / 500</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setScore(id, val, dimIdx) {
+            responses[id] = val;
+            localStorage.setItem('dmi_resp', JSON.stringify(responses));
+            renderQuestions(dimIdx);
+        }
+
+        function saveEvidence(id, val, dimIdx) {
+            evidence[id] = val;
+            localStorage.setItem('dmi_evid', JSON.stringify(evidence));
+            renderQuestions(dimIdx);
+        }
+
+        function showView(viewId) {
+            ['view-exec', 'view-assess', 'view-questions'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { 
+    // Auto sign-in as Admin while login page is disabled
+    try { currentUser = { username: 'Admin', role: 'admin' }; sessionStorage.setItem('tasheer_user_ent_v3', JSON.stringify(currentUser)); } catch(e) {}
+    const appWrap = document.getElementById('app-wrapper'); if (appWrap) appWrap.classList.add('active');
+    try { renderExec(); } catch(e) { console.error(e); }
+});
+    </script>
+</body>
+</html>
